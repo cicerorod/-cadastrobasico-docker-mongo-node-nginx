@@ -1,0 +1,63 @@
+---------- container
+docker info -> informações as configurações
+docker version -> versão do docker e docker client
+docker search [parametro] -> busca 
+docker search apache -> traz as imagens do apache
+docker pull httpd -> baixa a imagem oficial do apacha para o cliente
+docker rum --name myapache -d -p 8080:80 httpd (sobe uma imagem com nome myapache para executar 
+	em backgroud(-d) na porta(-p) 8080:80. Apenas para subir a primeira vez, se for necessário reiniciar tem que usar o docker start "nome da imagem"
+docker ps -> informações dos container em execução
+docker ps -a -> informações dos todos os container (em execução ou padados)
+
+docker stop myapache -> para o container (passar o nome ou o ID)
+docker start myapache -> sobre o container
+
+docker container inspect ex-daemon-basic -> apresenta em formato json as informações do container
+docker run -p 8080:80 -v C:\cursos\docker\udemy\curso-docker\ex-volume\html:/usr/share/nginx/html nginx -> sobe o container e atribui um volume
+docker start -ai mydeb - inicia e entra dentro do container
+docker container run --name mydeb -it debian bash - cria um container e entra dentro dele
+docker exec ex-daemon-basic uname -or -> informações de SO EX: 4.19.76-linuxkit GNU/Linux
+
+---------- image
+docker image pull redis:latest -> Baixa a ultima versão do redis
+Docker image inspect redis:latest -> informações sobre a imagem
+docker image tag redis:latest newimageredis -> tag para uma nova descrição da imagem
+docker image ls -> lista as imagens
+docker image rm redis:latest newimageredis
+docker image build 
+docker image push 
+docker image tag ex-build-dev build-dev:1.0 -> cria uma nova imagem "build-dev" com a tag 1.0 a partir da imagem ex-build-dev
+"docker image build -t primeirobuild ." -> cria uma imagem a partir do arquivo Dockerfile da pasta raiz
+docker container run --name contprimeirobuild -p 8082:80 primeirobuild -> executa um container a partir da imagem criada
+docker image inspect --format="{{index .Config.Labels \"maintainer\"}}" ex-build -> extrai informações dos labens do imagem
+docker image build -t build-com-parametro .
+
+----SUBIR IMAGEM NO DOCKER HUB
+docker login --username=cicerorod
+docker tag build-dev:1.0 cicerorod/dockerhub:myfirstimagepush
+docker push cicerorod/dockerhub:myfirstimagepush
+
+---- REDES 
+docker network ls -> lista as redes padroes
+docker container run --rm alpine ash -c "ifconfig" -> rede padrão
+docker container run --rm --net none alpine ash -c "ifconfig" -> executando o ifconfig em uma rede none
+docker container run -d  --name container1 alpine sleep 1000
+docker container exec -it container1 ifconfig -> mostra a rede que o container1 esta e seu ip
+docker container run -d  --name container2 alpine sleep 1000
+docker container exec -it container2 ifconfig -> mostra a rede que o container2 esta e seu ip
+docker container exec -it container1 ping 172.17.0.3 -> container1 pingando container2
+docker container exec -it container1 ping www.google.com -> consegue pingar porque a rede (bridge) tem conectividade
+
+--CRIAR REDE
+docker network create --driver bridge rede_nova
+docker network ls
+docker network inspect rede_nova
+docker container run -d --name container3 --net rede_nova alpine sleep 1000
+docker container exec -it container3 ifconfig -> mostra a rede que o container3 esta e seu ip
+docker container exec -it container3 ping 172.17.0.2 -> container3 não acessa container 1 porque nao pertence a mesma rede
+docker network connect bridge container3 -> faz a liberação da rede bridge para que o contaner3 possa acessar
+docker network disconnect bridge container3 -> retira o acesso do container3 da rede bridge 
+
+------ DOCKER-COMPOSE
+docker-compose up
+docker container exec -it node-mongo-compose_frontend_1 ifconfig
